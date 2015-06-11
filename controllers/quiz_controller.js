@@ -12,15 +12,24 @@ exports.load = function(req,res,next, quizId){
 };
 
 exports.index = function(req,res){
+	if(req.query.search){
+		var replaced = req.query.search.split(' ').join('%');
+		models.Quiz.findAll({where: ["pregunta like ?", '%'+replaced+'%']}).then(function(quizes){
 
-	models.Quiz.findAll().then(function(quizes){
+			res.render('quizes/index',{title:'Quiz',quizes:quizes});
+		}).catch(function(error){next(error);});
+	}else{
+		models.Quiz.findAll().then(function(quizes){
 
-		res.render('quizes/index',{title:'Quiz',quizes:quizes});
-	}).catch(function(error){next(error);});
+			res.render('quizes/index',{title:'Quiz',quizes:quizes});
+		}).catch(function(error){next(error);});
+
+	}
 };
 
 //Get /quizes/:id
 exports.show = function(req,res){
+
 	res.render('quizes/show',{title:'Quiz',quiz:req.quiz});
 	/*models.Quiz.findById(req.params.quizId).then(function(quiz){
 		console.log('sss'+quiz.id);
