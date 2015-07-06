@@ -1,5 +1,17 @@
 var models = require('../models/models.js');
 
+exports.load = function(req,res,next, commentId){
+
+models.Comment.find({
+	where: {id:Number(commentId) }
+}).then(function(comment){
+			if(comment){
+				req.comment=comment;
+				next();
+			} else { next(new Error('No existe commentId='+commentId));}
+
+	}).catch(function(error){next(error);});
+};
 
 //GET /quizes/:quizId/comments/new
 exports.new = function(req,res){
@@ -34,42 +46,12 @@ exports.create = function(req,res){
 
 };
 
-//GET /quizes/:id/edit
-exports.edit = function(req,res){
-	var quiz= req.quiz;
-	res.render('quizes/edit',{quiz:quiz, errors:[]});
-};
-
-//PUT /quizes/:id
-exports.update = function(req,res){
-	req.quiz.pregunta= req.body.quiz.pregunta;
-	req.quiz.respuesta= req.body.quiz.respuesta;
-	req.quiz.tema= req.body.quiz.tema;
-
-	req.quiz
-	.validate()
-	.then (
-		function(err){
-			if(err){
-				res.render('quizes/edit',{quiz:req.quiz,errors:err.errors});
-			} else{
-				req.quiz
-				.save({fields:["pregunta","respuesta","tema"]})
-				.then(function(){
-					res.redirect('/quizes');
-				});
-			}
-		}
-	);
-
-
-};
-
-//DELETE /quizes/:id
-exports.destroy = function(req,res){
-	req.quiz.destroy()
-	.then(function(){
-		res.redirect('/quizes');
+//GET /quizes/:quizId/comments/:commentId/publish
+exports.publish = function(req,res){
+	req.comment.publicado=true;
+	req.comment.save(
+		{fields:["publicado"]}
+	).then(function(){
+		res.redirect('/quizes/'+req.params.quizId);
 	}).catch(function(error){next(error)});
-
 };
