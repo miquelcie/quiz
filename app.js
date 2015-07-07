@@ -33,7 +33,22 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+// Helpers dinamicos:
+app.use(function(req, res, next) {
+  // guardar path en session.redir para despues de login
 
+  if (req.session.user){
+
+    var time=new Date().getTime();
+    if ((time-req.session.time)>=120000){
+      delete req.session.user;
+    }
+    req.session.time=new Date().getTime();
+
+  }
+
+  next();
+});
 
 // Helpers dinamicos:
 app.use(function(req, res, next) {
